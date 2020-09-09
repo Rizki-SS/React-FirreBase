@@ -13,7 +13,7 @@ const SingUpPage = () => (
 )
 
 const INITIAL_STATE ={
-    usename: "",
+    username: "",
     email: "",
     passwordOne: "",
     passwordTwo: "",
@@ -27,12 +27,21 @@ class SingUpFormBase extends React.Component {
     }
 
     onSubmit = (event) => {
-        const {usename, email, passwordOne} = this.state;
+        const {username, email, passwordOne} = this.state;
 
         this.props.firebase
             .doCreateUserWithEmailAndPassword(email, passwordOne)
             .then(authUser=>{
-                this.setState({...INITIAL_STATE});
+                //create user in firebase realtime
+                return this.props.firebase
+                .user(authUser.user.uid)
+                .set({
+                    username,
+                    email,
+                });
+            })
+            .then(() => {
+                this.setState({ ...INITIAL_STATE });
                 this.props.history.push(ROUTES.HOME);
             })
             .catch(error=>{
@@ -47,23 +56,23 @@ class SingUpFormBase extends React.Component {
 
     render() {
         const {
-            usename, email, passwordOne, passwordTwo, error
+            username, email, passwordOne, passwordTwo, error
         } = this.state;
 
         const isInvalid =
             passwordOne !== passwordTwo ||
             passwordOne === '' ||
             email === '' ||
-            usename === '';
+            username === '';
 
         return (
             <form onSubmit={this.onSubmit}>
                 <input 
                     type="text"
-                    name="usename"
+                    name="username"
                     onChange={this.onChange}
                     placeholder="Full Name"
-                    value={usename}
+                    value={username}
                 />
                 <input
                     name="email"
