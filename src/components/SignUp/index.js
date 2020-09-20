@@ -5,6 +5,8 @@ import { compose } from "recompose";
 import * as ROUTES from '../../constants/routes';
 import { withFirebase } from "../Firebase";
 
+import * as ROLES from '../../constants/roles';
+
 const SingUpPage = () => (
     <div>
         <h1>SingUp</h1>
@@ -17,6 +19,7 @@ const INITIAL_STATE ={
     email: "",
     passwordOne: "",
     passwordTwo: "",
+    isAdmin:false,
     error: null,
 }
 
@@ -26,8 +29,20 @@ class SingUpFormBase extends React.Component {
         this.state ={...INITIAL_STATE};
     }
 
+    onChangeCheckbox = event => {
+        this.setState({[event.target.name]:event.target.checked});
+    }
+
     onSubmit = (event) => {
-        const {username, email, passwordOne} = this.state;
+        const {username, email, passwordOne, isAdmin} = this.state;
+
+        const roles ={};
+
+        if (isAdmin) {
+            roles[ROLES.ADMIN] = ROLES.ADMIN;
+        }else{
+            roles[ROLES.USER] = ROLES.USER;
+        }
 
         this.props.firebase
             .doCreateUserWithEmailAndPassword(email, passwordOne)
@@ -38,6 +53,7 @@ class SingUpFormBase extends React.Component {
                 .set({
                     username,
                     email,
+                    roles
                 });
             })
             .then(() => {
@@ -56,7 +72,7 @@ class SingUpFormBase extends React.Component {
 
     render() {
         const {
-            username, email, passwordOne, passwordTwo, error
+            username, email, passwordOne, passwordTwo, error, isAdmin
         } = this.state;
 
         const isInvalid =
@@ -67,6 +83,16 @@ class SingUpFormBase extends React.Component {
 
         return (
             <form onSubmit={this.onSubmit}>
+                <label>
+                    Admin:
+                    <input
+                        name="isAdmin"
+                        type="checkbox"
+                        checked={isAdmin}
+                        onChange={this.onChangeCheckbox}
+                    />
+                </label>
+
                 <input 
                     type="text"
                     name="username"

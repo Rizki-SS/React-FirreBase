@@ -6,17 +6,17 @@ import { compose } from "recompose";
 import AuthUserContext from "./contect";
 import { withFirebase } from "../Firebase";
 import * as ROUTES from "../../constants/routes";
-import { auth } from "firebase";
 
 const withAuthotization = condition => Component => {
     class WithAuthotization extends React.Component {
         componentDidMount() {
-            this.listener = this.props.firebase.auth.onAuthStateChanged(
+            this.listener = this.props.firebase.onAuthUserListener(
                 authUser => {
                     if (!condition(authUser)) {
-                        this.props.history.push(ROUTES.SIGN_IN);
+                        this.props.history.push(ROUTES.HOME);
                     }
                 },
+                () => this.props.history.push(ROUTES.HOME),
             );
         }
 
